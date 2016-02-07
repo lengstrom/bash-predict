@@ -149,7 +149,9 @@ class NGramModel:
                     if not i in prev.successors:
                         return False
             prev = prev.successors[i]
-        return prev.best_succ
+
+        top_succ = sorted([(i, prev.successors[i].count) for i in prev.successors], key = lambda x: x[1])[-5:]
+        return top_succ
 
 class NGramModel31(NGramModel):
     # def __init__(self, corpus_sentences, verify, n = 3):
