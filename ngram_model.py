@@ -1,16 +1,9 @@
-import cPickle, heapq, Queue
+import cPickle, heapq, Queue, pdb
 from collections import Counter
 
+#pdb.set_trace()
+
 k = 3
-         
-def get_token_counts(lines):
-    all_tokens = Counter()
-
-    for i in lines:
-        tokens = map(lambda x: x.strip(), i.split())
-        all_tokens.update(tokens)
-
-    return all_tokens
 
 class NGramNode:
 
@@ -28,7 +21,7 @@ class NGramNode:
             self.successor[token].count += 1
 
         #Update most likely successor 
-        if self.best_succ == None || self.successor[token].count > self.best_count:
+        if self.best_succ == None or self.successor[token].count > self.best_count:
             self.best_succ = token
             self.best_count = self.successor[token].count
 
@@ -36,21 +29,30 @@ class NGramNode:
 
 class NGramModel:
     def __init__(self, corpus_sentences, root):
-        for i in corpus_sentences:
+        i = 0;
+        for sentence in corpus_sentences:
+            i += 1
             self.process_sentence(sentence, root)
+            if i % 1000 == 0:
+                print i
 
     def process_sentence(self, sentence, root):
         sentence = sentence.split()
-        index = 0;
-        for index in range(len(sentence))
+        for index in xrange(0,len(sentence)):
             node = root.add_successor(sentence[index])
-            tokens = sentence[i:i+k]
+            tokens = sentence[index:index+k]
             last_node = node
             for token in tokens:
                 n = last_node.add_successor(token)
                 last_node = n
 
-    def process_input(input, root):
+    def printTree(self, root):
+        print "root " 
+        print root.successor
+
+
+    def process_input(self, input, root):
+        print "processing input...."
         input = input.split()
         index = 1
         # while look to try to use up to k tokens to base prediction
@@ -65,23 +67,22 @@ class NGramModel:
             return ""
         else:
             last_node = root.successor[tokens[0]]
-        for i in range(1:len(tokens)):
+        for i in xrange(1,len(tokens)):
             last_node = last_node.successor[tokens[i]]
 
+        print last_node.best_succ
         return last_node.best_succ
 
 
-
-
 if __name__ == "__main__":
-    _, corpus_path = sys.argv
+    corpus_path = '/Users/sarahwooders/projects/bash-predict/text.txt'
     with open(corpus_path) as f:
         lines = f.readlines()
 
-    counts = get_token_counts(lines)
-    K = 15 # number of counts before
+    root = NGramNode("")
+    model = NGramModel(lines, root)
+    #pdb.set_trace()
+    i = raw_input('Enter input: ')
+    model.printTree(root)
+    model.process_input(i, root)
 
-    #DECLARE ROOT HERE 
-
-    def is_wildcard(token):
-        return counts[token.strip()] < K + 1
