@@ -141,7 +141,24 @@ class NGramModel:
                     if not i in prev.successors:
                         return False
             prev = prev.successors[i]
-        return prev.best_succ
+        top_succ = ()
+        used = [len(prev.successors)]
+        count = 0
+        while count < len(prev.successors) and count < k
+            max_val = None
+            max_count = 0
+            max_index = -1
+            i = 0
+            for p in prev.successors:
+                if p.best_count > max_count and not used[i]:
+                    max_val = p.value
+                    max_count = p.best_count
+                    max_index = i
+                i += 1
+            used[max_index]
+            top_succ.append(max_val)
+            count += 1
+        return top_succ
 
     def process_input(self, inp, idx): # idx is the index of the element of inp where
         # the predicted output should be after
@@ -155,7 +172,7 @@ class NGramModel:
            # return self.predict_2s_ngram(to_pred)
 
 if __name__ == "__main__":
-    corpus_path = 'todo.txt'
+    corpus_path = '/Users/sarahwooders/projects/bash-predict/text.txt'
     with open(corpus_path) as f:
         lines = f.readlines()
 
