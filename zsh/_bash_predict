@@ -8,10 +8,10 @@ _hello() {
         '1: :->country'\
         '*: :->city'
 
-    res=`python /Users/loganengstrom/projects/bash-predict/call_server.py $words $CURSOR`
-    for i in $res;
+    reso=$( python /Users/loganengstrom/projects/bash-predict/call_server.py $words $CURSOR )
+    for i in ${(z)reso};
     do
-        compadd "$@" $i
+        compadd "$@" $i 
     done
 }
 

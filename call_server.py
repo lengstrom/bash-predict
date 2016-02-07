@@ -10,4 +10,4 @@ else:
     }
 
     r = requests.get('http://0.0.0.0:5000/', params=payload)
-    print str(r.text)
+    print r.text
