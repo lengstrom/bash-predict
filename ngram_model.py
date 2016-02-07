@@ -188,8 +188,7 @@ class NGramModel31(NGramModel):
             prev = prev.successors[i]
         return prev.best_succ
 
-if __name__ == "__main__":
-    corpus_path = 'final.txt'
+def extract_model(corpus_path):
     with open(corpus_path) as f:
         lines = f.readlines()
 
@@ -245,5 +244,11 @@ if __name__ == "__main__":
         if res == False:
             return ""
         return " ".join(res)
+
+    return model31, model, process_input, get_predicted
+
+if __name__ == "__main__":
+    corpus_path = 'final.txt'
+    model31, model, process_input, get_predicted = extract_model(corpus_path)
     best_succ = process_input('tar _.XZ_', 1)
     print best_succ
