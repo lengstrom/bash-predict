@@ -1,4 +1,4 @@
-#compdef tar 
+#compdef ps
 
 _hello() { 
     local curcontext="$curcontext" state line

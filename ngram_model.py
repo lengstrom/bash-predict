@@ -152,7 +152,7 @@ class NGramModel:
                         return False
             prev = prev.successors[i]
 
-        top_succ = sorted([(i, prev.successors[i].count) for i in prev.successors], key = lambda x: x[1])[-5:]
+        top_succ = filter(lambda x: not (x[0] == '_' and x[-1] == '_'), sorted([(i, prev.successors[i].count) for i in prev.successors], key = lambda x: x[0]))[-5:]
         return top_succ
 
 class NGramModel31(NGramModel):
@@ -187,7 +187,7 @@ class NGramModel31(NGramModel):
                     if not i in prev.successors:
                         return False
             prev = prev.successors[i]
-        top_succ = sorted([(i, prev.successors[i].count) for i in prev.successors], key = lambda x: x[1])[-5:]
+        top_succ = filter(lambda x: not (x[0] == '_' and x[-1] == '_'), sorted([(i, prev.successors[i].count) for i in prev.successors], key = lambda x: x[0]))[-5:]
         return top_succ
 #        return prev.best_succ
 
@@ -237,7 +237,6 @@ def extract_model(corpus_path):
     models = (model, model31)
     # pickle models
     def process_input(inp, idx):
-        pdb.set_trace()
         inp = (convert_to_tokens(verify))(inp)
         N = model.N - 1
         if len(inp) == idx:
@@ -259,16 +258,22 @@ def extract_model(corpus_path):
         # get predicted word
         whitespaces = 0
         curr = False
+        started=False
+        wordlen = len(words)
         for i, v in enumerate(words):
-            if v.isspace():
+            if v.isspace() and started == True:
                 if curr == False:
                     whitespaces += 1
                     curr = True
                 else:
                     curr = False
             else:
-                if i == len(words) - 1:
+                if not v.isspace():
+                    started=True
+                if i == wordlen - 1:
                     whitespaces += 1
+            if pos == i:
+                break
 
         res = process_input(words, whitespaces)
         res = filter(lambda x: not (x[0] == '_' and x[-1] == "_"), res)

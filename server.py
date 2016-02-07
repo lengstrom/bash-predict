@@ -30,13 +30,22 @@ def get_predicted(words, pos):
         return ""
 
     return " ".join(res)
-
+archive = {
+    
+}
 class CommandHandler(tornado.web.RequestHandler):
     def get(self):
+        global archive
         pos = int(self.get_argument('position'))
         words = str(self.get_argument('words'))
-        predicted = get_predicted(words, pos)
+        hashable = str(pos) + " " + words
+        if hashable in archive:
+            predicted = archive[hashable]
+        else:
+            predicted = get_predicted(words, pos)
+            archive[hashable] = predicted
         self.write(predicted)
+        #pdb.set_trace()
 
 if __name__ == "__main__":
     print "Loading data..."
