@@ -1,4 +1,4 @@
-import cPickle, heapq
+import cPickle, heapq, Queue
 from collections import Counter
          
 def get_token_counts(lines):
@@ -10,18 +10,23 @@ def get_token_counts(lines):
 
     return all_tokens
 
+class NGramNode:
+    def __init__(self):
+        self.edges = {}
+
+    def add_edge(self, edge):
+        if not edge in self.edges:
+            self.edges[edge] = NGramNode()
+
+    def add_num(self, edge):
+        pass
+
 class NGramModel:
     def __init__(self, corpus_sentences):
-        possible_tokens = {}
-        n = 0
-        for i in corpus_sentences:
-            for j in i:
-                if j in possible_tokens:
-                    n += 1
-
-
         for i in corpus_sentences:
             self.process_sentence(sentence)
+
+        self.model = 
 
     def process_sentence(self, sentence):
         pass
