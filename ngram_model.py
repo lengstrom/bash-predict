@@ -202,6 +202,10 @@ if __name__ == "__main__":
     model = NGramModel(lines, verify, n = 4)
     model31 = NGramModel31(lines, verify, n = 4)
 
+    models = (model, model31)
+    # pickle models
+    
+
     def process_input(inp, idx):
         inp = (convert_to_tokens(verify))(inp)
         if len(inp) == idx:
@@ -209,6 +213,26 @@ if __name__ == "__main__":
             return model.predict_ngram(inp[-(model.N-1):idx])
         else:
             return model31.predict_ngram(inp[idx-((model.N-1)-1):idx] + inp[idx:idx+1])
+
+    def get_predicted(words, pos):
+        # get predicted word
+        whitespaces = 0
+        curr = False
+        for i, v in enumerate(words):
+            if v.isspace():
+                if curr == False:
+                    whitespaces += 1
+                    curr = True
+                else:
+                    curr = False
+            else:
+                if i == len(words) - 1:
+                    whitespaces += 1
+
+        res = process_input(words, whitespaces)
+        if res == False:
+            return ""
+        return " ".join(res)
 
     best_succ = process_input('a e c', 3)
     print best_succ
