@@ -103,7 +103,7 @@ class NGramNode:
 
         return successor
 
-    def add_successor_chain(self, tokens):
+    def add_successor_chain(self, tokens, verify):
         prev = self
         length = len(tokens)
         if length < self.N:
@@ -130,7 +130,7 @@ class NGramModel:
         for idx, token in enumerate(all_tokens):
             tokens = all_tokens[idx:idx+self.N]#filter(self.verify, sentence[idx:])[:self.N]
             if tokens:
-                self.root.add_successor_chain(tokens)
+                self.root.add_successor_chain(tokens, self.verify)
 
     def predict_ngram(self, inp):
         length = len(inp)
@@ -166,7 +166,7 @@ class NGramModel31(NGramModel):
             #assert len(tokens) == self.N
             tokens = all_tokens[max(0, idx-(self.N-1)):idx - 1] + all_tokens[idx:idx+1] + all_tokens[idx-1:idx] #filter(self.verify, sentence[idx:])[:self.N]
             if tokens:
-                self.root.add_successor_chain(tokens)
+                self.root.add_successor_chain(tokens, self.verify)
 
     def predict_ngram(self, inp):
         length = len(inp)
