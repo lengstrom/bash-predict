@@ -80,10 +80,11 @@ def convert_to_tokens(verify):
     return true_tokenize
 
 class NGramNode:
-    def __init__(self, value):
+    def __init__(self, value, n = 3):
         self.successors = {}
         self.value = value
         self.count = 1
+        self.N = n
         self.best_succ = None #the child that is most probable, and how many times it occurs
         self.best_count = 0
 
@@ -104,6 +105,9 @@ class NGramNode:
 
     def add_successor_chain(self, tokens):
         prev = self
+        length = len(tokens)
+        if length < self.N:
+            tokens = range(self.N - length)[::-1] + tokens
         for i in tokens:
             if not verify(i):
                 i = "____"
@@ -129,8 +133,12 @@ class NGramModel:
                 self.root.add_successor_chain(tokens)
 
     def predict_ngram(self, inp):
-        if len(inp) == 0:
+        length = len(inp)
+        if length == 0:
             return ""
+
+        if length + 1 < self.N:
+            inp = range(self.N - length)[::-1] + inp
 
         prev = self.root
         for i in inp:
@@ -143,19 +151,40 @@ class NGramModel:
             prev = prev.successors[i]
         return prev.best_succ
 
-    def process_input(self, inp, idx): # idx is the index of the element of inp where
-        # the predicted output should be after
-        inp = (convert_to_tokens(self.verify))(inp)
-        if len(inp) == idx or True:
-            #return self.predict_ngram(filter(self.verify, inp)[-self.N:])
-            return self.predict_ngram(inp[-(self.N-1):idx])
-        else:
-            return self.predict_31_ngram(inp[idx-((self.N-1)-1):idx + 1])
-           # to_pred = filter(self.verify, inp[:idx])[-(self.N-1):] + filter(self.verify, inp[idx:])[0:1]
-           # return self.predict_2s_ngram(to_pred)
+class NGramModel31(NGramModel):
+    # def __init__(self, corpus_sentences, verify, n = 3):
+    #     super()
+    def process_sentence(self, sentence):
+        all_tokens = sentence.split()
+        stop = len(all_tokens) - 1
+        for idx, token in enumerate(all_tokens):
+            if idx == 0:
+                continue
+            tokens = all_tokens[idx-(self.N-1):idx] + all_tokens[idx:idx+1]#filter(self.verify, sentence[idx:])[:self.N]
+            if tokens:
+                self.root.add_successor_chain(tokens)
+
+    def predict_ngram(self, inp):
+        length = len(inp)
+        if length == 0:
+            return ""
+
+        if length < N:
+            inp = range(N - length)[::-1] + inp
+
+        prev = self.root
+        for i in inp:
+            if not i in prev.successors:
+                i = '____'
+                if not i in prev.successors:
+                    i = prev.best_succ
+                    if not i in prev.successors:
+                        return False
+            prev = prev.successors[i]
+        return prev.best_succ
 
 if __name__ == "__main__":
-    corpus_path = 'todo.txt'
+    corpus_path = 'toy.txt'
     with open(corpus_path) as f:
         lines = f.readlines()
 
@@ -163,11 +192,21 @@ if __name__ == "__main__":
     min_occurances = 0
 
     def verify(word):
-        if counts[word.strip()] >= min_occurances:
+        if type(word) == str:
+            word = word.strip()
+        if counts[word] >= min_occurances:
             return True
         return False
-
     model = NGramModel(lines, verify, n = 4)
-    pdb.set_trace()
-    best_succ = model.process_input('a e c', 3)
+    model31 = NGramModel31(lines, verify, n = 4)
+
+    def process_input(inp, idx):
+        inp = (convert_to_tokens(verify))(inp)
+        if len(inp) == idx:
+            #return self.predict_ngram(filter(self.verify, inp)[-self.N:])
+            return model.predict_ngram(inp[-(model.N-1):idx])
+        else:
+            return model31.predict_ngram(inp[idx-((model.N-1)-1):idx] + inp[idx:idx+1])
+
+    best_succ = process_input('a e c', 3)
     print best_succ
