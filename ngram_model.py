@@ -80,7 +80,7 @@ def convert_to_tokens(verify):
     return true_tokenize
 
 class NGramNode:
-    def __init__(self, value, n = 3):
+    def __init__(self, value, n = 4):
         self.successors = {}
         self.value = value
         self.count = 1
@@ -109,12 +109,12 @@ class NGramNode:
         if length < self.N:
             tokens = range(self.N - length)[::-1] + tokens
         for i in tokens:
-            if not verify(i):
+            if type(i) == str and not verify(i):
                 i = "____"
             prev = prev.add_successor(i)
 
 class NGramModel:
-    def __init__(self, corpus_sentences, verify, n = 3):
+    def __init__(self, corpus_sentences, verify, n = 4):
         self.root = NGramNode("")
         self.verify = verify
         self.N = n
@@ -122,7 +122,7 @@ class NGramModel:
         for sentence in corpus_sentences:
             i += 1
             self.process_sentence(sentence)
-            if i % 1000 == 0:
+            if i % 100000 == 0:
                 print i
 
     def process_sentence(self, sentence):
@@ -137,8 +137,9 @@ class NGramModel:
         if length == 0:
             return ""
 
-        if length + 1 < self.N:
-            inp = range(self.N - length)[::-1] + inp
+        N = self.N - 1
+        if length < N:
+            inp = range(N - length)[::-1] + inp
 
         prev = self.root
         for i in inp:
@@ -162,7 +163,8 @@ class NGramModel31(NGramModel):
         for idx, token in enumerate(all_tokens):
             if idx == 0:
                 continue
-            tokens = all_tokens[idx-(self.N-1):idx] + all_tokens[idx:idx+1]#filter(self.verify, sentence[idx:])[:self.N]
+            #assert len(tokens) == self.N
+            tokens = all_tokens[max(0, idx-(self.N-1)):idx - 1] + all_tokens[idx:idx+1] + all_tokens[idx-1:idx] #filter(self.verify, sentence[idx:])[:self.N]
             if tokens:
                 self.root.add_successor_chain(tokens)
 
@@ -171,6 +173,7 @@ class NGramModel31(NGramModel):
         if length == 0:
             return ""
 
+        N = self.N - 1
         if length < N:
             inp = range(N - length)[::-1] + inp
 
@@ -186,12 +189,12 @@ class NGramModel31(NGramModel):
         return prev.best_succ
 
 if __name__ == "__main__":
-    corpus_path = 'toy.txt'
+    corpus_path = 'final.txt'
     with open(corpus_path) as f:
         lines = f.readlines()
 
     counts = get_token_counts(lines)
-    min_occurances = 0
+    min_occurances = 40
 
     def verify(word):
         if type(word) == str:
@@ -204,15 +207,24 @@ if __name__ == "__main__":
 
     models = (model, model31)
     # pickle models
-    
-
     def process_input(inp, idx):
+        pdb.set_trace()
         inp = (convert_to_tokens(verify))(inp)
+        N = model.N - 1
         if len(inp) == idx:
             #return self.predict_ngram(filter(self.verify, inp)[-self.N:])
-            return model.predict_ngram(inp[-(model.N-1):idx])
+            to_pred = inp[max(0, -(model.N-1)):idx]
+            if len(to_pred) > 0:
+                return model.predict_ngram(to_pred)
+            print "empty query!"
+            return False
         else:
-            return model31.predict_ngram(inp[idx-((model.N-1)-1):idx] + inp[idx:idx+1])
+            #to_pred = inp[idx:idx+1] + inp[max(0,idx-((model.N-1)-1)):idx]
+            to_pred = inp[max(0, idx-(N-1)):idx+1]
+            if len(to_pred) > 0:
+                return model31.predict_ngram(to_pred)
+            print "empty query!"
+            return False
 
     def get_predicted(words, pos):
         # get predicted word
@@ -233,6 +245,5 @@ if __name__ == "__main__":
         if res == False:
             return ""
         return " ".join(res)
-
-    best_succ = process_input('a e c', 3)
+    best_succ = process_input('tar _.XZ_', 1)
     print best_succ

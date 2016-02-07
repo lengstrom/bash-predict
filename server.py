@@ -28,6 +28,7 @@ def get_predicted(words, pos):
     res = process_input(words, whitespaces)
     if res == False:
         return ""
+
     return " ".join(res)
 
 class CommandHandler(tornado.web.RequestHandler):
@@ -38,7 +39,7 @@ class CommandHandler(tornado.web.RequestHandler):
         self.write(predicted)
 
 if __name__ == "__main__":
-    corpus_path = 'toy.txt'
+    corpus_path = 'final.txt'
     with open(corpus_path) as f:
         lines = f.readlines()
 
@@ -51,6 +52,7 @@ if __name__ == "__main__":
         if counts[word] >= min_occurances:
             return True
         return False
+
     model = NGramModel(lines, verify, n = 4)
     model31 = NGramModel31(lines, verify, n = 4)
 
