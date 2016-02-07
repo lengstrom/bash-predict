@@ -48,7 +48,7 @@ def parse_line(line, verify):
     quotes = set(['\'', '"'])
     out = []
     last_n = 0
-    for i in range(len(line)):
+    for i in xrange(0, len(line)):
         char = line[i]
         if char in quotes:
             if curr_quote == False:
@@ -60,7 +60,7 @@ def parse_line(line, verify):
             if line[i] == ' ':
                 line = line[:i] + '_' + line[i+1:]
 
-    out.append(process_line(line[last_n:i]))
+    out.append(process_line(line[last_n:i+1]))
     concat = "".join(out)
     string = concat.replace('\'', '').replace('"', '').replace('\ ', '_')
 
@@ -90,7 +90,7 @@ class NGramNode:
     def add_successor(self, token):
         if not token in self.successors:
             successor = NGramNode(token)
-            self.successors[token] = token
+            self.successors[token] = successor
         else:
             successor = self.successors[token]
             successor.count += 1
@@ -122,9 +122,9 @@ class NGramModel:
                 print i
 
     def process_sentence(self, sentence):
-        tokens = sentence.split()
-        for idx, token in enumerate(tokens):
-            tokens = sentence[idx:idx+self.N]#filter(self.verify, sentence[idx:])[:self.N]
+        all_tokens = sentence.split()
+        for idx, token in enumerate(all_tokens):
+            tokens = all_tokens[idx:idx+self.N]#filter(self.verify, sentence[idx:])[:self.N]
             if tokens:
                 self.root.add_successor_chain(tokens)
 
@@ -134,34 +134,40 @@ class NGramModel:
 
         prev = self.root
         for i in inp:
-            prev = self.root[i]
+            if not i in prev.successors:
+                i = '____'
+                if not i in prev.successors:
+                    i = prev.best_succ
+                    if not i in prev.successors:
+                        return False
+            prev = prev.successors[i]
         return prev.best_succ
 
     def process_input(self, inp, idx): # idx is the index of the element of inp where
         # the predicted output should be after
-        inp = map(convert_to_tokens(self.verify), inp)
-        if len(inp) == idx:
+        inp = (convert_to_tokens(self.verify))(inp)
+        if len(inp) == idx or True:
             #return self.predict_ngram(filter(self.verify, inp)[-self.N:])
-            return self.predict_ngram(inp[-self.N:])
+            return self.predict_ngram(inp[-(self.N-1):idx])
         else:
-            return self.predict_31_ngram(inp[idx-(self.N-1):idx + 1])
+            return self.predict_31_ngram(inp[idx-((self.N-1)-1):idx + 1])
            # to_pred = filter(self.verify, inp[:idx])[-(self.N-1):] + filter(self.verify, inp[idx:])[0:1]
            # return self.predict_2s_ngram(to_pred)
 
 if __name__ == "__main__":
-    corpus_path = 'toy.txt'
+    corpus_path = 'todo.txt'
     with open(corpus_path) as f:
         lines = f.readlines()
 
     counts = get_token_counts(lines)
-    min_occurances = 20
+    min_occurances = 0
 
     def verify(word):
         if counts[word.strip()] >= min_occurances:
             return True
         return False
-        
-    model = NGramModel(lines, verify, n = 3)
-    #pdb.set_trace()
-    best_succ = model.process_input('a b c', 3)
+
+    model = NGramModel(lines, verify, n = 4)
+    pdb.set_trace()
+    best_succ = model.process_input('a e c', 3)
     print best_succ
