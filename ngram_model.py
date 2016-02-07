@@ -1,4 +1,5 @@
-import cPickle, pdb, os
+import pdb, os
+import cPickle as pickle
 from collections import Counter
 
 # helpers
@@ -190,6 +191,19 @@ class NGramModel31(NGramModel):
         return top_succ
 #        return prev.best_succ
 
+
+class Verify(object):
+    def __init__(self, counts, min_occurances):
+        self.counts = counts
+        self.min_occurances = min_occurances
+
+    def __call__(self, word):
+        if type(word) == str:
+            word = word.strip()
+        if self.counts[word] >= self.min_occurances:
+            return True
+        return False
+
 def extract_model(corpus_path):
     with open(corpus_path) as f:
         lines = f.readlines()
@@ -197,14 +211,28 @@ def extract_model(corpus_path):
     counts = get_token_counts(lines)
     min_occurances = 40
 
-    def verify(word):
-        if type(word) == str:
-            word = word.strip()
-        if counts[word] >= min_occurances:
-            return True
-        return False
-    model = NGramModel(lines, verify, n = 4)
-    model31 = NGramModel31(lines, verify, n = 4)
+    verify = Verify(counts, min_occurances)
+
+    try:
+        with open('model.pickle', 'rb') as f:
+            model = pickle.load(f)
+    except:
+        print 'Building model'
+        model = NGramModel(lines, verify, n = 4)
+        with open('model.pickle', 'wb') as f:
+            pickle.dump(model, f)
+    else:
+        print 'Loaded pickled model'
+    try:
+        with open('model31.pickle', 'rb') as f:
+            model31 = pickle.load(f)
+    except:
+        print 'Building model31'
+        model31 = NGramModel31(lines, verify, n = 4)
+        with open('model31.pickle', 'wb') as f:
+            pickle.dump(model31, f)
+    else:
+        print 'Loaded pickled model31'
 
     models = (model, model31)
     # pickle models
