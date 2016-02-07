@@ -1,4 +1,4 @@
-import cPickle, pdb
+import cPickle, pdb, os
 from collections import Counter
 
 # helpers
@@ -246,7 +246,7 @@ def extract_model(corpus_path):
         res = filter(lambda x: not (x[0] == '_' and x[-1] == "_"), res)
         if res == False:
             return ""
-        return " ".join(res)
+        return " ".join([i[0] for i in res])
 
     return model31, model, process_input, get_predicted
 

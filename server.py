@@ -34,16 +34,19 @@ def get_predicted(words, pos):
 class CommandHandler(tornado.web.RequestHandler):
     def get(self):
         pos = int(self.get_argument('position'))
-        words = str(self.get_argument('words')).split()
+        words = str(self.get_argument('words'))
         predicted = get_predicted(words, pos)
         self.write(predicted)
 
 if __name__ == "__main__":
+    print "Loading data..."
     model31, model, process_input, get_predicted = ngram_model.extract_model('final.txt')
     app = tornado.web.Application([
         (r"/", CommandHandler)
     ])
+    print "    done"
     
     server = tornado.httpserver.HTTPServer(app)
     server.listen(5000)
+    print "Started server!"
     tornado.ioloop.IOLoop.instance().start()

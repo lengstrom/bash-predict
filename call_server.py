@@ -9,5 +9,5 @@ else:
         "position":int(args[-1])
     }
 
-    r = requests.get('0.0.0.0:5000/', params=payload)
-    return str(r.text)
+    r = requests.get('http://0.0.0.0:5000/', params=payload)
+    print str(r.text)
