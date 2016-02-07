@@ -152,7 +152,7 @@ class NGramModel:
                         return False
             prev = prev.successors[i]
 
-        top_succ = filter(lambda x: not (x[0] == '_' and x[-1] == '_'), sorted([(i, prev.successors[i].count) for i in prev.successors], key = lambda x: x[0]))[-5:]
+        top_succ = filter(lambda x: not (x[0][0] == '_' and x[0][-1] == '_'), sorted([(i, prev.successors[i].count) for i in prev.successors], key = lambda x: x[0]))[-5:]
         return top_succ
 
 class NGramModel31(NGramModel):
@@ -187,7 +187,7 @@ class NGramModel31(NGramModel):
                     if not i in prev.successors:
                         return False
             prev = prev.successors[i]
-        top_succ = filter(lambda x: not (x[0] == '_' and x[-1] == '_'), sorted([(i, prev.successors[i].count) for i in prev.successors], key = lambda x: x[0]))[-5:]
+        top_succ = filter(lambda x: not (x[0][0] == '_' and x[0][-1] == '_'), sorted([(i, prev.successors[i].count) for i in prev.successors], key = lambda x: x[0]))[-5:]
         return top_succ
 #        return prev.best_succ
 
