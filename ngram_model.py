@@ -28,7 +28,7 @@ class NGramNode:
             self.successor[token].count += 1
 
         #Update most likely successor 
-        if self.best_succ == null || self.successor[token].count > self.best_count:
+        if self.best_succ == None || self.successor[token].count > self.best_count:
             self.best_succ = token
             self.best_count = self.successor[token].count
 
@@ -52,15 +52,23 @@ class NGramModel:
 
     def process_input(input, root):
         input = input.split()
-        if len(input) > k:
-            tokens = input[len(input) - k:len(input)]    
+        index = 1
+        # while look to try to use up to k tokens to base prediction
+        while index <= k:
+            if input[len(input) - index] in root.successor:
+                index += 1
+            else:
+                break 
+        #we now have index start position
+        tokens = input[len(input) - index:len(input) - 1]
+        if not input[len(input) - index] in root.successor:
+            return ""
         else:
-            tokens = input[i:i+len(input)]   
-        n = root.successor[tokens[0]]
-        for t in tokens:
+            last_node = root.successor[tokens[0]]
+        for i in range(1:len(tokens)):
+            last_node = last_node.successor[tokens[i]]
 
-
-
+        return last_node.best_succ
 
 
 
