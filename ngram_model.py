@@ -186,7 +186,9 @@ class NGramModel31(NGramModel):
                     if not i in prev.successors:
                         return False
             prev = prev.successors[i]
-        return prev.best_succ
+        top_succ = sorted([(i, prev.successors[i].count) for i in prev.successors], key = lambda x: x[1])[-5:]
+        return top_succ
+#        return prev.best_succ
 
 def extract_model(corpus_path):
     with open(corpus_path) as f:
@@ -216,14 +218,14 @@ def extract_model(corpus_path):
             if len(to_pred) > 0:
                 return model.predict_ngram(to_pred)
             print "empty query!"
-            return False
+            return []
         else:
             #to_pred = inp[idx:idx+1] + inp[max(0,idx-((model.N-1)-1)):idx]
             to_pred = inp[max(0, idx-(N-1)):idx+1]
             if len(to_pred) > 0:
                 return model31.predict_ngram(to_pred)
             print "empty query!"
-            return False
+            return []
 
     def get_predicted(words, pos):
         # get predicted word
@@ -241,6 +243,7 @@ def extract_model(corpus_path):
                     whitespaces += 1
 
         res = process_input(words, whitespaces)
+        res = filter(lambda x: not (x[0] == '_' and x[-1] == "_"), res)
         if res == False:
             return ""
         return " ".join(res)
